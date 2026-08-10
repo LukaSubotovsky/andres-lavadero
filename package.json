@@ -1,0 +1,14 @@
+{
+  "name": "lavadero-pro",
+  "version": "1.0.0",
+  "description": "Sistema de gestión profesional para lavaderos de autos (SaaS)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
