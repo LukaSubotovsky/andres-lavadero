@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Lavadero Pro — Gestión Profesional</title>
+<meta name="description" content="Sistema de gestión profesional para lavaderos de autos: clientes, caja, gastos, promociones y estadísticas.">
+<link rel="stylesheet" href="/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ============ PANTALLA DE LOGIN ============ -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🚗✨</div>
+    <h1>Lavadero Pro</h1>
+    <p class="login-sub">Iniciá sesión para continuar</p>
+    <form id="loginForm" autocomplete="off">
+      <label>Usuario</label>
+      <input type="text" id="loginUsuario" placeholder="andres / empleado" required autocomplete="username">
+      <label>Contraseña</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+      <button type="submit" id="loginBtn" class="btn btn-primary btn-block">Ingresar</button>
+      <p id="loginError" class="login-error" style="display:none;"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ============ APP PRINCIPAL ============ -->
+<div id="app" class="app-shell" style="display:none;">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="logo-mini">🚗✨</span>
+      <span class="brand">Lavadero Pro</span>
+    </div>
+    <div class="topbar-right">
+      <span id="userBadge" class="user-badge"></span>
+      <button id="logoutBtn" class="btn btn-ghost btn-sm">Salir</button>
+    </div>
+  </header>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab-btn active" data-tab="hoy">📋 Hoy</button>
+    <button class="tab-btn" data-tab="clientes" data-admin>👥 Clientes</button>
+    <button class="tab-btn" data-tab="promociones" data-admin>📣 Promociones</button>
+    <button class="tab-btn" data-tab="caja" data-admin>💰 Caja</button>
+    <button class="tab-btn" data-tab="gastos" data-admin>🧾 Gastos</button>
+    <button class="tab-btn" data-tab="estadisticas" data-admin>📊 Estadísticas</button>
+    <button class="tab-btn" data-tab="configuracion" data-admin>⚙️ Configuración</button>
+  </nav>
+
+  <main class="content">
+
+    <!-- ===================== HOY ===================== -->
+    <section id="tab-hoy" class="tab-panel active">
+      <div class="panel-header">
+        <h2>Vehículos de hoy</h2>
+        <button class="btn btn-primary" id="btnNuevoVehiculo">+ Nuevo ingreso</button>
+      </div>
+      <div id="hoyLista" class="cards-grid"></div>
+    </section>
+
+    <!-- ===================== CLIENTES ===================== -->
+    <section id="tab-clientes" class="tab-panel">
+      <div class="panel-header">
+        <h2>Clientes</h2>
+        <input type="text" id="buscarCliente" class="input-search" placeholder="Buscar por nombre...">
+      </div>
+      <div id="clientesLista" class="table-wrap"></div>
+    </section>
+
+    <!-- ===================== PROMOCIONES ===================== -->
+    <section id="tab-promociones" class="tab-panel">
+      <div class="panel-header"><h2>Promociones</h2></div>
+      <div class="card">
+        <label>Filtrar destinatarios</label>
+        <select id="promoFiltro" class="input">
+          <option value="todos">Todos los clientes</option>
+          <option value="Hombre">Hombres</option>
+          <option value="Mujer">Mujeres</option>
+          <option value="Jubilado">Jubilados</option>
+          <option value="nuevos">Clientes nuevos (30 días)</option>
+          <option value="frecuentes">Clientes frecuentes (5+ visitas)</option>
+          <option value="inactivos30">Hace +30 días que no vienen</option>
+          <option value="sinPromo">Nunca recibieron promociones</option>
+        </select>
+        <button class="btn btn-secondary" id="btnCargarPromo">Buscar clientes</button>
+        <div id="promoResumen" class="muted" style="margin-top:8px;"></div>
+        <label style="margin-top:16px;">Mensaje (usá <code>{nombre}</code> para personalizar)</label>
+        <textarea id="promoMensaje" class="input" rows="4" placeholder="Hola {nombre} 👋, tenemos una promo especial para vos..."></textarea>
+        <button class="btn btn-primary" id="btnGenerarCola" style="margin-top:12px;">Generar cola de envío</button>
+      </div>
+      <div id="promoCola"></div>
+    </section>
+
+    <!-- ===================== CAJA ===================== -->
+    <section id="tab-caja" class="tab-panel">
+      <div class="panel-header"><h2>Caja</h2></div>
+      <h3 class="section-title">Caja del día</h3>
+      <div class="cards-grid" id="cajaDia"></div>
+      <h3 class="section-title">Caja mensual</h3>
+      <div class="cards-grid" id="cajaMes"></div>
+    </section>
+
+    <!-- ===================== GASTOS ===================== -->
+    <section id="tab-gastos" class="tab-panel">
+      <div class="panel-header">
+        <h2>Gastos</h2>
+        <button class="btn btn-primary" id="btnNuevoGasto">+ Nuevo gasto</button>
+      </div>
+      <div id="gastosLista" class="table-wrap"></div>
+    </section>
+
+    <!-- ===================== ESTADISTICAS ===================== -->
+    <section id="tab-estadisticas" class="tab-panel">
+      <div class="panel-header"><h2>Estadísticas</h2></div>
+
+      <div id="alertasBox"></div>
+
+      <h3 class="section-title">Resumen de hoy</h3>
+      <div class="cards-grid" id="statResumen"></div>
+
+      <h3 class="section-title">Hoy</h3>
+      <div class="cards-grid" id="statHoy"></div>
+
+      <h3 class="section-title">Semana</h3>
+      <div class="cards-grid" id="statSemana"></div>
+
+      <h3 class="section-title">Mes</h3>
+      <div class="cards-grid" id="statMes"></div>
+
+      <h3 class="section-title">Clientes</h3>
+      <div class="cards-grid" id="statClientes"></div>
+
+      <h3 class="section-title">Rankings</h3>
+      <div class="rankings-grid" id="statRankings"></div>
+
+      <h3 class="section-title">Gráficos</h3>
+      <div class="charts-grid">
+        <div class="card chart-card"><canvas id="chartFacturacion"></canvas></div>
+        <div class="card chart-card"><canvas id="chartIngresosGastos"></canvas></div>
+        <div class="card chart-card"><canvas id="chartMedioPago"></canvas></div>
+        <div class="card chart-card"><canvas id="chartAutos"></canvas></div>
+      </div>
+    </section>
+
+    <!-- ===================== CONFIGURACION ===================== -->
+    <section id="tab-configuracion" class="tab-panel">
+      <div class="panel-header"><h2>Configuración</h2></div>
+      <div class="card">
+        <h3 class="section-title" style="margin-top:0;">Catálogo de servicios</h3>
+        <div id="serviciosLista"></div>
+        <div class="new-service-row">
+          <input type="text" id="nuevoServicioNombre" class="input" placeholder="Nombre del servicio">
+          <input type="number" id="nuevoServicioPrecio" class="input" placeholder="Precio">
+          <button class="btn btn-secondary" id="btnAgregarServicio">Agregar</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ MODALES ============ -->
+<div id="modalOverlay" class="modal-overlay" style="display:none;">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
